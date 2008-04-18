@@ -191,6 +191,11 @@ If GUESSER is set, it's used instead of the default."
   (let ((debug-ignored-errors `(,(apply 'format args))))
     (error (car debug-ignored-errors))))
 
+(defcustom guess-style-maximum-false-spaces 0.3
+  "*The percentage of space indents with five or more to keep `tab-width' at 4."
+  :type 'number
+  :group 'guess-style)
+
 (defcustom guess-style-minimum-line-count 3
   "*The number of significant lines needed to make a guess."
   :type 'number
@@ -225,7 +230,8 @@ If GUESSER is set, it's used instead of the default."
           (few-spaces (how-many "^\t+  ? ?[^ ]" (point-min) (point-max))))
       (when (< (+ many-spaces few-spaces) guess-style-minimum-line-count)
         (guess-style-error "Not enough lines"))
-      (if (> many-spaces few-spaces) 8 4))))
+      (if (> many-spaces
+             (* guess-style-maximum-false-spaces few-spaces)) 8 4))))
 
 (defun guess-style-how-many (regexp)
   "A simplified `how-many' that uses `c-syntactic-re-search-forward'."
