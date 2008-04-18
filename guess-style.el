@@ -57,8 +57,7 @@ To remember the guess for the future, use `guess-style-override-variable'."
   (interactive (list (intern (completing-read "Variable: "
                                               guess-style-guesser-alist nil t))
                      (read (read-string "Value: "))))
-  (set (make-local-variable variable) value)
-  (guess-style-update-lighter))
+  (set (make-local-variable variable) value))
 
 (defvar guess-style-overridden-variable-alist nil
   "List of files and directories with manually overridden guess-style variables.
@@ -290,9 +289,6 @@ If GUESSER is set, it's used instead of the default."
 This has to be a function that takes no arguments and returns a info string
 for the current buffer.")
 
-(defvar guess-style-lighter "")
-(make-variable-buffer-local 'guess-style-lighter)
-
 (defun guess-style-get-indent ()
   (case major-mode
     (nxml-mode nxml-child-indent)
@@ -306,22 +302,14 @@ for the current buffer.")
     (concat (when indent-depth (format " >%d" indent-depth))
             " " (if indent-tabs-mode (format "t%d" tab-width) "spc"))))
 
-(defun guess-style-update-lighter (&optional buffer)
-  (save-current-buffer
-    (when buffer (set-buffer buffer))
-    (setq guess-style-lighter (funcall guess-style-lighter-format-func))))
-
-(defvar guess-style-info-timer nil)
-(make-variable-buffer-local 'guess-style-info-timer)
-
 (define-minor-mode guess-style-info-mode
   ""
-  nil guess-style-lighter nil
-  (if guess-style-info-mode
-      (setq guess-style-info-timer
-            (run-with-timer 0 4 'guess-style-update-lighter (current-buffer)))
-    (cancel-timer guess-style-info-timer)
-    (kill-local-variable 'guess-style-info-timer)))
+  nil nil nil)
+
+;; providing a lighter in `define-minor-mode' doesn't allow :eval forms
+(add-to-list 'minor-mode-alist
+             '(guess-style-info-mode
+               ((:eval (funcall guess-style-lighter-format-func)))))
 
 (provide 'guess-style)
 ;;; guess-style.el ends here
