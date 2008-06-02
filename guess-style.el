@@ -112,9 +112,8 @@ If FILE is nil, `buffer-file-name' is used."
 (defun guess-style-read-override-file ()
   "Read overridden variables from `guess-style-override-file'."
   (let ((file (expand-file-name guess-style-override-file)))
-    (if (file-readable-p file)
-        (load-file file)
-      (warn "guess-style override file %s not found" guess-style-override-file))
+    (when (file-readable-p file)
+      (load-file file))
     (put 'guess-style-overridden-variable-alist 'read-from-file t)))
 
 (defun guess-style-override-variable (variable value file)
