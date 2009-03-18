@@ -302,6 +302,9 @@ for the current buffer.")
   ""
   nil nil nil)
 
+(define-globalized-minor-mode global-guess-style-info-mode
+  guess-style-info-mode (lambda () (guess-style-info-mode 1)))
+
 ;; providing a lighter in `define-minor-mode' doesn't allow :eval forms
 (add-to-list 'minor-mode-alist
              '(guess-style-info-mode
