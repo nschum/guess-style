@@ -52,11 +52,13 @@
   :group 'guess-style
   :type 'coding-system)
 
-(defvar guess-style-guesser-alist
+(defcustom guess-style-guesser-alist
   '((indent-tabs-mode . guess-style-guess-tabs-mode)
     (tab-width . guess-style-guess-tab-width)
     (c-basic-offset . guess-style-guess-c-basic-offset))
-  "A list of cons containing a variable and a guesser function.")
+  "*A list of cons containing a variable and a guesser function."
+  :group 'guess-style
+  :type '(repeat (cons variable function)))
 
 ;;;###autoload
 (defun guess-style-set-variable (variable value)
@@ -279,11 +281,13 @@ If GUESSER is set, it's used instead of the default."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar guess-style-lighter-format-func
+(defcustom guess-style-lighter-format-func
   'guess-style-lighter-default-format-func
   "*Function used for formatting the lighter in `guess-style-info-mode'.
 This has to be a function that takes no arguments and returns a info string
-for the current buffer.")
+for the current buffer."
+  :group 'guess-style
+  :type 'function)
 
 (defun guess-style-get-indent ()
   (case major-mode
