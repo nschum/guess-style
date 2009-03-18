@@ -290,8 +290,8 @@ for the current buffer.")
 
 (defun guess-style-get-indent ()
   (case major-mode
-    (nxml-mode nxml-child-indent)
-    (css-mode css-indent-offset)
+    (nxml-mode (when (boundp 'nxml-child-indent) nxml-child-indent))
+    (css-mode (when (boundp 'css-indent-offset) css-indent-offset))
     (otherwise (and (boundp 'c-buffer-is-cc-mode)
                     c-buffer-is-cc-mode
                     c-basic-offset))))
