@@ -35,7 +35,6 @@
 
 (add-to-list 'debug-ignored-errors "^Not enough lines to guess variable$")
 (add-to-list 'debug-ignored-errors "^Not certain enough to guess variable$")
-(add-to-list 'debug-ignored-errors "^Not a cc-mode$")
 
 (defgroup guess-style nil
   "Automatic setting of code style variables."
@@ -62,7 +61,9 @@
 (defcustom guess-style-guesser-alist
   '((indent-tabs-mode . guess-style-guess-tabs-mode)
     (tab-width . guess-style-guess-tab-width)
-    (c-basic-offset . guess-style-guess-c-basic-offset))
+    (c-basic-offset . guess-style-guess-c-basic-offset)
+    (nxml-child-indent . guess-style-guess-indent)
+    (css-indent-offset . guess-style-guess-indent))
   "*A list of cons containing a variable and a guesser function."
   :group 'guess-style
   :type '(repeat (cons variable function)))
@@ -156,22 +157,31 @@ If GUESSER is set, it's used instead of the default."
     (setq guesser (cdr (assoc variable guess-style-guesser-alist))))
   (condition-case err
       (let ((overridden-value
-             (cdr (assoc variable (guess-style-overridden-variables)))))
-        (set (make-local-variable variable) (or overridden-value
-                                                (funcall guesser)))
+             (cdr (assoc variable (guess-style-overridden-variables))))
+            (guessed-value (funcall guesser)))
+        (set (make-local-variable variable)
+             (or overridden-value guessed-value))
         (message "%s variable '%s' (%s)"
                  (if overridden-value "Remembered" "Guessed")
-                 variable (eval variable)))
+                 variable (symbol-value variable))
+        `(lambda () ,(symbol-value variable)))
     (error (message "Could not guess variable '%s' (%s)" variable
-                    (error-message-string err)))))
+                    (error-message-string err))
+           `(lambda () (error "%s" (error-message-string ,err))))))
 
 ;;;###autoload
 (defun guess-style-guess-all ()
-  "Guess all variables in `guess-style-guesser-alist'."
+  "Guess all variables in `guess-style-guesser-alist'.
+Special care is taken so no guesser is called twice."
   (interactive)
-  (dolist (pair guess-style-guesser-alist)
-    (guess-style-guess-variable (car pair) (cdr pair))))
-
+  (let (cache match)
+    (dolist (pair guess-style-guesser-alist)
+      ;; Cache, so we don't call the same guesser twice.
+      (if (setq match (assoc (cdr pair) cache))
+          (guess-style-guess-variable (car pair) (cdr match))
+        (push (cons (cdr pair)
+                    (guess-style-guess-variable (car pair) (cdr pair)))
+              cache)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -233,6 +243,14 @@ If GUESSER is set, it's used instead of the default."
 (defun guess-style-guess-c-basic-offset ()
   (unless (and (boundp 'c-buffer-is-cc-mode) c-buffer-is-cc-mode)
     (error "Not a cc-mode"))
+  (let (c-buffer-is-cc-mode)
+    (flet ((how-many (regexp) (guess-style-how-many regexp)))
+      (guess-style-guess-indent))))
+
+(defun guess-style-guess-indent ()
+  (and (boundp 'c-buffer-is-cc-mode)
+       c-buffer-is-cc-mode
+       (error "This is a cc-mode"))
   (let* ((tab (case tab-width
                 (8 "\\(\\( \\{,7\\}\t\\)\\|        \\)")
                 (4 "\\(\\( \\{,3\\}\t\\)\\|    \\)")
@@ -250,9 +268,9 @@ If GUESSER is set, it's used instead of the default."
                       (8 (concat "^" tab "+" end))
                       (4 (concat "^" tab "\\{2\\}+" end))
                       (2 (concat "^" tab "\\{4\\}+" end))))
-         (two (guess-style-how-many two-exp))
-         (four (guess-style-how-many four-exp))
-         (eight (guess-style-how-many eight-exp))
+         (two (how-many two-exp))
+         (four (how-many four-exp))
+         (eight (how-many eight-exp))
          (total (+ two four eight))
          (too-close-to-call (* guess-style-too-close-to-call total)))
     (when (< total guess-style-minimum-line-count)
