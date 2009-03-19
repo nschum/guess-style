@@ -33,6 +33,10 @@
 
 (eval-when-compile (require 'cl))
 
+(add-to-list 'debug-ignored-errors "^Not enough lines to guess variable$")
+(add-to-list 'debug-ignored-errors "^Not certain enough to guess variable$")
+(add-to-list 'debug-ignored-errors "^Not a cc-mode$")
+
 (defgroup guess-style nil
   "Automatic setting of code style variables."
   :group 'c
@@ -171,11 +175,6 @@ If GUESSER is set, it's used instead of the default."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun guess-style-error (&rest args)
-  "Signal an error like `error', but don't debug it."
-  (let ((debug-ignored-errors `(,(apply 'format args))))
-    (error (car debug-ignored-errors))))
-
 (defcustom guess-style-maximum-false-spaces 0.3
   "*The percentage of space indents with five or more to keep `tab-width' at 4."
   :type 'number
@@ -204,7 +203,7 @@ If GUESSER is set, it's used instead of the default."
            (num-nontabs (how-many "^    " (point-min) (point-max)))
            (total (+ num-tabs num-nontabs)))
       (when (< total guess-style-minimum-line-count)
-        (guess-style-error "Not enough lines"))
+        (error "Not enough lines to guess variable"))
       (> (/ (float num-tabs) total) guess-style-maximum-false-tabs))))
 
 (defun guess-style-guess-tab-width ()
@@ -214,7 +213,7 @@ If GUESSER is set, it's used instead of the default."
     (let ((many-spaces (how-many "^\t+ \\{4,7\\}[^ ]" (point-min) (point-max)))
           (few-spaces (how-many "^\t+  ? ?[^ ]" (point-min) (point-max))))
       (when (< (+ many-spaces few-spaces) guess-style-minimum-line-count)
-        (guess-style-error "Not enough lines"))
+        (error "Not enough lines to guess variable"))
       (if (> many-spaces
              (* guess-style-maximum-false-spaces few-spaces)) 8 4))))
 
@@ -233,7 +232,7 @@ If GUESSER is set, it's used instead of the default."
 
 (defun guess-style-guess-c-basic-offset ()
   (unless (and (boundp 'c-buffer-is-cc-mode) c-buffer-is-cc-mode)
-    (guess-style-error "Not a cc-mode"))
+    (error "Not a cc-mode"))
   (let* ((tab (case tab-width
                 (8 "\\(\\( \\{,7\\}\t\\)\\|        \\)")
                 (4 "\\(\\( \\{,3\\}\t\\)\\|    \\)")
@@ -257,7 +256,7 @@ If GUESSER is set, it's used instead of the default."
          (total (+ two four eight))
          (too-close-to-call (* guess-style-too-close-to-call total)))
     (when (< total guess-style-minimum-line-count)
-      (guess-style-error "Not enough lines"))
+      (error "Not enough lines to guess variable"))
     (or (if (> two four)
             (if (> two eight)
                 (unless (< (- two (max four eight)) too-close-to-call) 2)
@@ -265,7 +264,7 @@ If GUESSER is set, it's used instead of the default."
           (if (> four eight)
               (unless (< (- four (max two eight)) too-close-to-call) 4)
             (unless (< (- eight four) too-close-to-call) 8)))
-        (guess-style-error "Too close to call"))))
+        (error "Not certain enough to guess variable"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
