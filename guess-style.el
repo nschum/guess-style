@@ -329,7 +329,8 @@ for the current buffer."
             " " (if indent-tabs-mode (format "t%d" tab-width) "spc"))))
 
 (define-minor-mode guess-style-info-mode
-  ""
+  "Minor mode to show guessed variables in the mode-line.
+Customize `guess-style-lighter-format-func' to change the variables."
   nil nil nil)
 
 (define-globalized-minor-mode global-guess-style-info-mode
