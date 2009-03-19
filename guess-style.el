@@ -63,18 +63,9 @@
   :group 'guess-style
   :type '(repeat (cons variable function)))
 
-;;;###autoload
-(defun guess-style-set-variable (variable value)
-  "Change VARIABLE's guessed value.
-To remember the guess for the future, use `guess-style-override-variable'."
-  (interactive (list (intern (completing-read "Variable: "
-                                              guess-style-guesser-alist nil t))
-                     (read (read-string "Value: "))))
-  (set (make-local-variable variable) value))
-
 (defvar guess-style-overridden-variable-alist nil
   "List of files and directories with manually overridden guess-style variables.
-Use `guess-style-override-variable' to modify this variable")
+Use `guess-style-set-variable' to modify this variable")
 
 (defun guess-style-overridden-variables (&optional file)
   "Return a list of FILE's overridden variables and their designated values.
@@ -130,14 +121,13 @@ If FILE is nil, `buffer-file-name' is used."
         old-alist)
     segments))
 
-(defun guess-style-override-variable (variable value file)
+;;;###autoload
+(defun guess-style-set-variable (variable value file)
   "Override VARIABLE's guessed value for future guesses.
 If FILE is a directory, the variable will be overridden for the entire
 directory, unless single files are later overridden.
 If called interactively, the current buffer's file name will be used for FILE.
-With a prefix argument a directory name may be entered.
-To change a variable for the current session only, use
-`guess-style-set-variable'."
+With a prefix argument a directory name may be entered."
   (interactive (list (intern (completing-read "Variable: "
                                               guess-style-guesser-alist nil t))
                      (read (read-string "Value: "))
@@ -147,7 +137,7 @@ To change a variable for the current session only, use
                        buffer-file-name)))
   ;; abbreviate file name for portability (e.g. different home directories)
   (setq file (abbreviate-file-name file))
-  (guess-style-set-variable variable value)
+  (set (make-local-variable variable) value)
   (unless (get 'guess-style-overridden-variable-alist 'read-from-file)
     (guess-style-read-override-file))
   (setq guess-style-overridden-variable-alist
@@ -164,8 +154,8 @@ If GUESSER is set, it's used instead of the default."
   (condition-case err
       (let ((overridden-value
              (cdr (assoc variable (guess-style-overridden-variables)))))
-        (guess-style-set-variable variable (or overridden-value
-                                               (funcall guesser)))
+        (set (make-local-variable variable) (or overridden-value
+                                                (funcall guesser)))
         (message "%s variable '%s' (%s)"
                  (if overridden-value "Remembered" "Guessed")
                  variable (eval variable)))
