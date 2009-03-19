@@ -234,7 +234,8 @@ Special care is taken so no guesser is called twice."
     (let ((count 0) opoint)
       (while (and (< (point) (point-max))
                   (progn (setq opoint (point))
-                         (c-syntactic-re-search-forward regexp nil t)))
+                         (when (fboundp 'c-syntactic-re-search-forward)
+                           (c-syntactic-re-search-forward regexp nil t))))
         (if (= opoint (point))
             (forward-char 1)
           (setq count (1+ count))))
@@ -300,6 +301,7 @@ for the current buffer."
     (css-mode (when (boundp 'css-indent-offset) css-indent-offset))
     (otherwise (and (boundp 'c-buffer-is-cc-mode)
                     c-buffer-is-cc-mode
+                    (boundp 'c-basic-offset)
                     c-basic-offset))))
 
 (defun guess-style-lighter-default-format-func ()
