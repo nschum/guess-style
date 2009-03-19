@@ -224,6 +224,11 @@ Special care is taken so no guesser is called twice."
   :type 'number
   :group 'guess-style)
 
+(defcustom guess-style-maximum-false-indent 0.1
+  "*Percentage of lines indented at a lower value than the default."
+  :type 'number
+  :group 'guess-style)
+
 (defun guess-style-guess-tabs-mode ()
   "Guess whether tabs are used for indenting in the current buffer."
   (save-restriction
@@ -295,14 +300,17 @@ Special care is taken so no guesser is called twice."
          (too-close-to-call (* guess-style-too-close-to-call total)))
     (when (< total guess-style-minimum-line-count)
       (error "Not enough lines to guess variable"))
-    (or (if (> two four)
-            (if (> two eight)
-                (unless (< (- two (max four eight)) too-close-to-call) 2)
-              (unless (< (- eight two) too-close-to-call) 8))
-          (if (> four eight)
-              (unless (< (- four (max two eight)) too-close-to-call) 4)
-            (unless (< (- eight four) too-close-to-call) 8)))
-        (error "Not certain enough to guess variable"))))
+    (let ((two-four (- two (* guess-style-maximum-false-indent four)))
+          (two-eight (- two (* guess-style-maximum-false-indent eight)))
+          (four-eight (- four (* guess-style-maximum-false-indent eight))))
+      (or (if (> two-four 0)
+              (if (> two-eight 0)
+                  (unless (< (min two-four two-eight) too-close-to-call) 2)
+                (unless (< (min two-four (- two-eight)) too-close-to-call) 8))
+            (if (> four-eight 0)
+                (unless (< (min (- two-four) four-eight) too-close-to-call) 4)
+              (unless (< (- four-eight) too-close-to-call) 8)))
+        (error "Not certain enough to guess variable")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
