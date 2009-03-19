@@ -71,7 +71,7 @@ To remember the guess for the future, use `guess-style-override-variable'."
 
 (defvar guess-style-overridden-variable-alist nil
   "List of files and directories with manually overridden guess-style variables.
-It is sorted, use only `guess-style-override-variable' to modify this variable")
+Use `guess-style-override-variable' to modify this variable")
 
 (defun guess-style-overridden-variables (&optional file)
   "Return a list of FILE's overridden variables and their designated values.
@@ -80,14 +80,15 @@ If FILE is nil, `buffer-file-name' is used."
   (unless (get 'guess-style-overridden-variable-alist 'read-from-file)
     (guess-style-read-override-file))
   (let ((alist guess-style-overridden-variable-alist)
-        result)
+        (segments (split-string (abbreviate-file-name file) "/"))
+        vars)
     (while alist
-      (if (equal (substring file 0 (min (length (caar alist)) (length file)))
-                 (caar alist))
-          (setq result (cdar alist)
-                alist nil)
-        (pop alist)))
-    result))
+      (dolist (pair (cdr (assoc :variables alist)))
+        (setcdr (or (assoc (car pair) vars)
+                    (car (push pair vars)))
+                (cdr pair)))
+      (setq alist (cdr (assoc (pop segments) alist))))
+    vars))
 
 (defun guess-style-write-override-file ()
   "Write overridden variables to `guess-style-override-file'."
@@ -115,6 +116,17 @@ If FILE is nil, `buffer-file-name' is used."
       (load-file file))
     (put 'guess-style-overridden-variable-alist 'read-from-file t)))
 
+(defun guess-style-add-to-alist (segments &optional old-alist)
+  (if (consp segments)
+      (let* ((match (assoc (car segments) old-alist))
+             (children (guess-style-add-to-alist (cdr segments) (cdr match))))
+        (if match
+            (setcdr match children)
+          (setq match (cons (car segments) children))
+          (push match old-alist))
+        old-alist)
+    segments))
+
 (defun guess-style-override-variable (variable value file)
   "Override VARIABLE's guessed value for future guesses.
 If FILE is a directory, the variable will be overridden for the entire
@@ -132,29 +144,13 @@ To change a variable for the current session only, use
                        buffer-file-name)))
   ;; abbreviate file name for portability (e.g. different home directories)
   (setq file (abbreviate-file-name file))
-  (if (file-directory-p file)
-      (setq file (file-name-as-directory file))
-    (setq file (directory-file-name file)))
   (guess-style-set-variable variable value)
   (unless (get 'guess-style-overridden-variable-alist 'read-from-file)
     (guess-style-read-override-file))
-  (let ((match (assoc file guess-style-overridden-variable-alist)))
-    (if match
-        (let ((pair (assq variable (cdr match))))
-          (if pair
-              ;; replace
-              (setcdr pair value)
-            ;; append
-            (setcdr match (cons (cons variable value) (cdr match)))))
-      ;; insert
-      (push (list file (cons variable value))
-            guess-style-overridden-variable-alist)
-      ;; keep list sorted
-      ;; TODO: just the new element is out of order, bubble it up
-      (setq guess-style-overridden-variable-alist
-            (sort guess-style-overridden-variable-alist
-                  (lambda (a b) (not (string< (car a) (car b))))))))
-  (guess-style-write-override-file))
+  (setq guess-style-overridden-variable-alist
+        (guess-style-add-to-alist (append (split-string file "/" t)
+                                          (cons :variables
+                                                (cons variable value))))))
 
 ;;;###autoload
 (defun guess-style-guess-variable (variable &optional guesser)
