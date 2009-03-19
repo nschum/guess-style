@@ -68,7 +68,7 @@
   :group 'guess-style
   :type '(repeat (cons variable function)))
 
-(defvar guess-style-overridden-variable-alist nil
+(defvar guess-style-overridden-variable-alist 'not-read
   "List of files and directories with manually overridden guess-style variables.
 Use `guess-style-set-variable' to modify this variable")
 
@@ -76,7 +76,7 @@ Use `guess-style-set-variable' to modify this variable")
   "Return a list of FILE's overridden variables and their designated values.
 If FILE is nil, `buffer-file-name' is used."
   (setq file (abbreviate-file-name (or file buffer-file-name)))
-  (unless (get 'guess-style-overridden-variable-alist 'read-from-file)
+  (when (eq guess-style-overridden-variable-alist 'not-read)
     (guess-style-read-override-file))
   (let ((alist guess-style-overridden-variable-alist)
         (segments (split-string (abbreviate-file-name file) "/"))
@@ -111,9 +111,9 @@ If FILE is nil, `buffer-file-name' is used."
 (defun guess-style-read-override-file ()
   "Read overridden variables from `guess-style-override-file'."
   (let ((file (expand-file-name guess-style-override-file)))
+    (setq guess-style-overridden-variable-alist nil)
     (when (file-readable-p file)
-      (load-file file))
-    (put 'guess-style-overridden-variable-alist 'read-from-file t)))
+      (load-file file))))
 
 (defun guess-style-add-to-alist (segments &optional old-alist)
   (if (consp segments)
@@ -142,12 +142,13 @@ With a prefix argument a directory name may be entered."
   ;; abbreviate file name for portability (e.g. different home directories)
   (setq file (abbreviate-file-name file))
   (set (make-local-variable variable) value)
-  (unless (get 'guess-style-overridden-variable-alist 'read-from-file)
+  (when (eq guess-style-overridden-variable-alist 'not-read)
     (guess-style-read-override-file))
   (setq guess-style-overridden-variable-alist
         (guess-style-add-to-alist (append (split-string file "/" t)
                                           (cons :variables
-                                                (cons variable value))))))
+                                                (cons variable value)))))
+  (guess-style-write-override-file))
 
 ;;;###autoload
 (defun guess-style-guess-variable (variable &optional guesser)
