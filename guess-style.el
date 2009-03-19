@@ -39,7 +39,10 @@
   :group 'files
   :group 'languages)
 
-(defcustom guess-style-override-file "~/.guess-style"
+(defcustom guess-style-override-file
+  (if (fboundp 'locate-user-emacs-file)
+      (locate-user-emacs-file "guess-style" ".guess-style")
+    "~/.guess-style")
   "*File name for storing the manual style settings"
   :group 'guess-style
   :type 'file)
