@@ -131,10 +131,9 @@ With a prefix argument a directory name may be entered."
   (interactive (list (intern (completing-read "Variable: "
                                               guess-style-guesser-alist nil t))
                      (read (read-string "Value: "))
-                     (if current-prefix-arg
-                         (read-file-name "Directory: " nil
-                                         (file-name-directory buffer-file-name))
-                       buffer-file-name)))
+                     (read-file-name "File/Directory: " nil buffer-file-name t
+                                     (file-name-nondirectory buffer-file-name)))
+               )
   ;; abbreviate file name for portability (e.g. different home directories)
   (setq file (abbreviate-file-name file))
   (set (make-local-variable variable) value)
