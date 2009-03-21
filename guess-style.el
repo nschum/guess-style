@@ -151,10 +151,7 @@ If FILE is nil, `buffer-file-name' is used."
 ;;;###autoload
 (defun guess-style-set-variable (variable value file)
   "Override VARIABLE's guessed value for future guesses.
-If FILE is a directory, the variable will be overridden for the entire
-directory, unless single files are later overridden.
-If called interactively, the current buffer's file name will be used for FILE.
-With a prefix argument a directory name may be entered."
+FILE is the file or directory for which the override is valid."
   (interactive (list (intern (completing-read "Variable: "
                                               guess-style-guesser-alist nil t))
                      (read (read-string "Value: "))
