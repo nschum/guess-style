@@ -45,6 +45,8 @@
 ;;
 ;;; Change Log:
 ;;
+;;    No longer fail on buffers not visiting a file.
+;;
 ;; 2009-03-19 (0.1)
 ;;    Initial release.
 ;;
@@ -94,19 +96,20 @@ Use `guess-style-set-variable' to modify this variable")
 (defun guess-style-overridden-variables (&optional file)
   "Return a list of FILE's overridden variables and their designated values.
 If FILE is nil, `buffer-file-name' is used."
-  (setq file (abbreviate-file-name (or file buffer-file-name)))
-  (when (eq guess-style-overridden-variable-alist 'not-read)
-    (guess-style-read-override-file))
-  (let ((alist guess-style-overridden-variable-alist)
-        (segments (split-string (abbreviate-file-name file) "/"))
-        vars)
-    (while alist
-      (dolist (pair (cdr (assoc :variables alist)))
-        (setcdr (or (assoc (car pair) vars)
-                    (car (push pair vars)))
-                (cdr pair)))
-      (setq alist (cdr (assoc (pop segments) alist))))
-    vars))
+  (unless file (setq file buffer-file-name))
+  (when file
+    (when (eq guess-style-overridden-variable-alist 'not-read)
+      (guess-style-read-override-file))
+    (let ((alist guess-style-overridden-variable-alist)
+          (segments (split-string (abbreviate-file-name file) "/"))
+          vars)
+      (while alist
+        (dolist (pair (cdr (assoc :variables alist)))
+          (setcdr (or (assoc (car pair) vars)
+                      (car (push pair vars)))
+                  (cdr pair)))
+        (setq alist (cdr (assoc (pop segments) alist))))
+      vars)))
 
 (defun guess-style-write-override-file ()
   "Write overridden variables to `guess-style-override-file'."
