@@ -45,6 +45,7 @@
 ;;
 ;;; Change Log:
 ;;
+;;    Fixed bug when overriding multiple variables.
 ;;    Guess `python-indent' by default.
 ;;    No longer fail on buffers not visiting a file.
 ;;
@@ -168,7 +169,8 @@ FILE is the file or directory for which the override is valid."
   (setq guess-style-overridden-variable-alist
         (guess-style-add-to-alist (append (split-string file "/" t)
                                           (cons :variables
-                                                (cons variable value)))))
+                                                (cons variable value)))
+                                  guess-style-overridden-variable-alist))
   (guess-style-write-override-file))
 
 ;;;###autoload
