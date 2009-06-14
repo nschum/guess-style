@@ -177,10 +177,9 @@ If GUESSER is set, it's used instead of the default."
     (setq guesser (cdr (assoc variable guess-style-guesser-alist))))
   (condition-case err
       (let ((overridden-value
-             (cdr (assoc variable (guess-style-overridden-variables))))
-            (guessed-value (funcall guesser)))
+             (cdr (assoc variable (guess-style-overridden-variables)))))
         (set (make-local-variable variable)
-             (or overridden-value guessed-value))
+             (or overridden-value (funcall guesser)))
         (message "%s variable '%s' (%s)"
                  (if overridden-value "Remembered" "Guessed")
                  variable (symbol-value variable))
