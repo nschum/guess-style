@@ -45,6 +45,7 @@
 ;;
 ;;; Change Log:
 ;;
+;;    Guess `python-indent' by default.
 ;;    No longer fail on buffers not visiting a file.
 ;;
 ;; 2009-03-19 (0.1)
@@ -84,7 +85,8 @@
     (tab-width . guess-style-guess-tab-width)
     (c-basic-offset . guess-style-guess-c-basic-offset)
     (nxml-child-indent . guess-style-guess-indent)
-    (css-indent-offset . guess-style-guess-indent))
+    (css-indent-offset . guess-style-guess-indent)
+    (python-indent . guess-style-guess-indent))
   "*A list of cons containing a variable and a guesser function."
   :group 'guess-style
   :type '(repeat (cons variable function)))
