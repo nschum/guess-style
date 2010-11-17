@@ -41,6 +41,7 @@
 ;;
 ;; To show some of the guessed variables in the mode-line, enable
 ;; guess-style-info-mode.  You can do this by adding this to your .emacs:
+;; (require 'guess-style)
 ;; (global-guess-style-info-mode 1)
 ;;
 ;;; Change Log:
