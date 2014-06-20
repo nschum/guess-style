@@ -277,7 +277,8 @@ Special care is taken so no guesser is called twice."
     (flet ((how-many (regexp) (guess-style-how-many regexp)))
       (guess-style-guess-indent))))
 
-(defun guess-style-guess-indent ()
+(defun guess-style-guess-indent (&optional how-many-func)
+  (unless how-many-func (setq how-many-func 'how-many))
   (and (boundp 'c-buffer-is-cc-mode)
        c-buffer-is-cc-mode
        (error "This is a cc-mode"))
@@ -298,9 +299,9 @@ Special care is taken so no guesser is called twice."
                       (8 (concat "^" tab "+" end))
                       (4 (concat "^" tab "\\{2\\}+" end))
                       (2 (concat "^" tab "\\{4\\}+" end))))
-         (two (how-many two-exp))
-         (four (how-many four-exp))
-         (eight (how-many eight-exp))
+         (two (funcall how-many-func two-exp))
+         (four (funcall how-many-func four-exp))
+         (eight (funcall how-many-func eight-exp))
          (total (+ two four eight))
          (too-close-to-call (* guess-style-too-close-to-call total)))
     (when (< total guess-style-minimum-line-count)
