@@ -83,12 +83,14 @@
   :type 'coding-system)
 
 (defcustom guess-style-guesser-alist
-  '((indent-tabs-mode . guess-style-guess-tabs-mode)
+  `((indent-tabs-mode . guess-style-guess-tabs-mode)
     (tab-width . guess-style-guess-tab-width)
     (c-basic-offset . guess-style-guess-c-basic-offset)
     (nxml-child-indent . guess-style-guess-indent)
     (css-indent-offset . guess-style-guess-indent)
-    (python-indent . guess-style-guess-indent))
+    (,(if (and (>= emacs-major-version 24) (>= emacs-minor-version 3))
+          'python-indent-offset
+        'python-indent) . guess-style-guess-indent))
   "*A list of cons containing a variable and a guesser function."
   :group 'guess-style
   :type '(repeat (cons variable function)))
