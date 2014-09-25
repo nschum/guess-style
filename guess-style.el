@@ -315,7 +315,7 @@ Special care is taken so no guesser is called twice."
             (if (> four-eight 0)
                 (unless (< (min (- two-four) four-eight) too-close-to-call) 4)
               (unless (< (- four-eight) too-close-to-call) 8)))
-        (error "Not certain enough to guess variable")))))
+          (error "Not certain enough to guess variable")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
