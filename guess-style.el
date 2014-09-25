@@ -274,8 +274,7 @@ Special care is taken so no guesser is called twice."
   (unless (and (boundp 'c-buffer-is-cc-mode) c-buffer-is-cc-mode)
     (error "Not a cc-mode"))
   (let (c-buffer-is-cc-mode)
-    (flet ((how-many (regexp) (guess-style-how-many regexp)))
-      (guess-style-guess-indent))))
+    (guess-style-guess-indent 'guess-style-how-many)))
 
 (defun guess-style-guess-indent (&optional how-many-func)
   (unless how-many-func (setq how-many-func 'how-many))
