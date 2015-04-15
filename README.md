@@ -18,7 +18,8 @@ To guess variables when a major mode is loaded, add guess-style-guess-all to tha
 To (permanently) override values use guess-style-set-variable. To change what variables are guessed, customize guess-style-guesser-alist.
 
 To show some of the guessed variables in the mode-line, enable guess-style-info-mode. You can do this by adding this to your .emacs:
+```elisp
 (global-guess-style-info-mode 1)
-
+```
 # Feedback
 If you have any feedback, please email me.
