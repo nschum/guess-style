@@ -88,7 +88,7 @@
     (c-basic-offset . guess-style-guess-c-basic-offset)
     (nxml-child-indent . guess-style-guess-indent)
     (css-indent-offset . guess-style-guess-indent)
-    (,(if (and (>= emacs-major-version 24) (>= emacs-minor-version 3))
+    (,(if (and (version<= "24.3" emacs-version))
           'python-indent-offset
         'python-indent) . guess-style-guess-indent))
   "*A list of cons containing a variable and a guesser function."
