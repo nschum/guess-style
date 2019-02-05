@@ -70,7 +70,7 @@
   (if (fboundp 'locate-user-emacs-file)
       (locate-user-emacs-file "guess-style" ".guess-style")
     "~/.guess-style")
-  "*File name for storing the manual style settings"
+  "*File name for storing the manual style settings."
   :group 'guess-style
   :type 'file)
 
@@ -101,7 +101,7 @@ Use `guess-style-set-variable' to modify this variable")
 
 (defun guess-style-overridden-variables (&optional file)
   "Return a list of FILE's overridden variables and their designated values.
-If FILE is nil, `buffer-file-name' is used."
+If FILE is nil, variable `buffer-file-name' is used."
   (unless file (setq file buffer-file-name))
   (when file
     (when (eq guess-style-overridden-variable-alist 'not-read)
@@ -156,7 +156,7 @@ If FILE is nil, `buffer-file-name' is used."
 
 ;;;###autoload
 (defun guess-style-set-variable (variable value file)
-  "Override VARIABLE's guessed value for future guesses.
+  "Override VARIABLE's guessed value with VALUE for future guesses.
 FILE is the file or directory for which the override is valid."
   (interactive (list (intern (completing-read "Variable: "
                                               guess-style-guesser-alist nil t))
@@ -343,11 +343,13 @@ for the current buffer."
     (concat (when indent-depth (format " >%d" indent-depth))
             " " (if indent-tabs-mode (format "t%d" tab-width) "spc"))))
 
+;;;###autoload
 (define-minor-mode guess-style-info-mode
   "Minor mode to show guessed variables in the mode-line.
 Customize `guess-style-lighter-format-func' to change the variables."
   nil nil nil)
 
+;;;###autoload
 (define-globalized-minor-mode global-guess-style-info-mode
   guess-style-info-mode (lambda () (guess-style-info-mode 1)))
 
