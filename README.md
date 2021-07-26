@@ -7,7 +7,7 @@ Guess variables like c-basic-offset, tab-width and indent-tabs-mode automaticall
 Add the following to your .emacs:
 
 ```elisp
-(add-to-path 'load-path "/path/to/guess-style")
+(add-to-list 'load-path "/path/to/guess-style")
 (autoload 'guess-style-set-variable "guess-style" nil t)
 (autoload 'guess-style-guess-variable "guess-style")
 (autoload 'guess-style-guess-all "guess-style" nil t)
